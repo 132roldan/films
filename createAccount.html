@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600&family=Poppins:wght@300;400;500;600&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet"> 
+  <link rel="stylesheet" href="style.css">
+  <title>Ephemeral Film List</title>
+</head>
+<body>
+  
+  
+  <header>
+    <nav>
+      <a href="index.html">Make your ephemeral film list</a>
+      
+    </nav>
+  </header>
+  <h2></h2>
+
+
+
+  <form  id="form">
+    Nickname:
+    <br>
+    <input type="text"  id="nickname">
+    <br>
+    Email:<br>
+    <input type="text"  id="email">
+    <br>
+    Password:<br>
+  <input type="password" id="password">
+    <input type="submit" value="Create" id="submit"><br><br>
+    <input type="button" id="loginGoogleBtn" value="login with Google">
+    
+
+  </form>
+ <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script  src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script>
+    
+    const firebaseConfig = {
+apiKey: "AIzaSyDwuhBt0XH_UOZEYZIZcLzjdvuvyvgWk7E",
+authDomain: "ephemeral-films.firebaseapp.com",
+projectId: "ephemeral-films",
+storageBucket: "ephemeral-films.appspot.com",
+messagingSenderId: "619401059069",
+appId: "1:619401059069:web:f15b1c3ca1d44b97073c94"
+};
+
+      firebase.initializeApp(firebaseConfig)
+  </script> 
+  <script>
+    
+      const email = document.getElementById('email')
+      const nickname = document.getElementById('nickname')
+      const password = document.getElementById('password')
+      const submit = document.getElementById('submit')
+      const loginGoogleBtn = document.getElementById('loginGoogleBtn')
+      const db = firebase.firestore()
+
+      loginGoogleBtn.addEventListener('click', function(){
+        if(!nickname.value){
+          console.error("preencher nickname!!")
+          return
+        }
+        console.log("test");
+        const provider = new firebase.auth.GoogleAuthProvider();
+
+        firebase.auth().signInWithPopup(provider).then(function(){
+          const user = firebase.auth().currentUser;
+          console.log("user", user);
+          
+        }).then((r)=>{
+          firebase.auth().onAuthStateChanged(user => {
+    if(user){
+      userx = user.uid;
+      debugger
+      console.log('usuarioID',userx)
+      db.collection("Lists").doc(userx).set({
+        nickname:nickname.value,
+        user: userx,
+        listadefilme: `<section>
+        <details>
+        <summary id="lista">${nickname.value+"'s List"}</summary>
+        <section id='${userx}' class="filmesSelected">
+        
+        </section>
+        </details>
+        </section>`,
+        listname: nickname.value+"'s List",
+    
+      })
+    }
+  })
+        })
+
+      })
+
+      submit.addEventListener('click', function (event){
+        event.preventDefault()
+        if(!email.value || !password.value || !nickname.value){ 
+          console.log('preencher dados');
+          return;
+          }
+          firebase.auth().createUserWithEmailAndPassword(email.value, password.value)
+      .then(function (data){
+        console.log('user created', data);
+        firebase.auth().onAuthStateChanged(user => {
+          debugger
+    if(user){
+      userx = user.uid;
+      console.log('usuarioID',userx)
+      db.collection("Lists").doc(userx).set({
+        nickname:nickname.value,
+        user: userx,
+        listadefilme: `<section>
+        <details>
+        <summary id="lista">${nickname.value+"'s List"}</summary>
+        <section id='${userx}' class="filmesSelected">
+        
+        </section>
+        </details>
+        </section>`,
+        listname: nickname.value+"'s List",
+    
+      })
+    }
+  })
+        
+        
+
+      }).catch((err)=> console.log('err', err));
+       
+      })
+
+      
+    
+</script>
+  
+ 
+  
+  
+  
+</body>
+</html>
